@@ -1,16 +1,16 @@
 swagger: "2.0"
 info:
-  description: "This is a sample server Petstore server.  You can find out more about     Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/).      For this sample, you can use the api key `special-key` to test the authorization     filters."
+  description: "Customer API allows different clients such as Mobile, Web etc to securely connect and perform customer management in CRM through REST API."
   version: "1.0.0"
-  title: "Swagger Petstore"
-  termsOfService: "http://swagger.io/terms/"
+  title: "Customer API"
+  termsOfService: "http://company.com/terms/"
   contact:
-    email: "apiteam@swagger.io"
+    email: "apiteam@company.com"
   license:
     name: "Apache 2.0"
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
-host: "petstore.swagger.io"
-basePath: "/v2"
+host: "api.company.com"
+basePath: "/v1"
 tags:
 - name: "Customer"
   description: "Customers of organisation"
@@ -19,6 +19,12 @@ tags:
     url: "https://crm.com/customer"
     
 parameters:
+  x-correlation-id:
+    name: "correlationId"
+    description: "Unique Id representing request used for distributed tracing"
+    in: "header"
+    type: "string"
+    required: true
   customerId:
     name: "customerId"
     description: "Unique identifier of a Customer in CRM system"
@@ -39,11 +45,10 @@ paths:
       operationId: "createCustomer"
       consumes:
       - "application/json"
-      - "application/xml"
       produces:
-      - "application/xml"
       - "application/json"
       parameters:
+      - $ref: '#/parameters/x-correlation-id'
       - in: "body"
         name: "body"
         description: "Customer object for creating new customer in CRM"
@@ -51,19 +56,20 @@ paths:
         schema:
           $ref: "#/definitions/Customer"
       responses:
-        202:
+        201:
           description: "Created"
+          schema:
+            $ref: "#/definitions/CreateCustomerResponse"
         400:
           description: "Bad request"
         403:
           description: "Unauthorised acceess"
         500:
           description: "Server error"
-          
       security:
-      - petstore_auth:
-        - "write:pets"
-        - "read:pets"
+      - oauth2:
+        - "create:customers"       
+        - "admin:customers"       
         
   /customers/{customerId}:  
     put:
@@ -72,6 +78,10 @@ paths:
       summary: "Update customer"
       description: "Update an existing Customer record by customerId in Organisation CRM system."
       operationId: "updateCustomer"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
       parameters:
         - $ref: '#/parameters/customerId'
         - in: "body"
@@ -89,6 +99,10 @@ paths:
           description: "Customer not found"
         500:
           description: "Server error"
+      security:
+      - oauth2:
+        - "update:customers"       
+        - "admin:customers"       
           
     delete:
       tags:
@@ -107,38 +121,50 @@ paths:
           description: "Customer not found"
         500:
           description: "Server error"
-            
+      security:
+      - oauth2:
+        - "delete:customers"       
+        - "admin:customers"       
+
 securityDefinitions:
-  petstore_auth:
+  oauth2:
     type: "oauth2"
-    authorizationUrl: "http://petstore.swagger.io/oauth/dialog"
+    authorizationUrl: "http://company.com/oauth/dialog"
     flow: "implicit"
     scopes:
-      write:pets: "modify pets in your account"
-      read:pets: "read your pets"
-  api_key:
-    type: "apiKey"
-    name: "api_key"
-    in: "header"
+      create:customers: "create new customer"
+      update:customers: "update customer"
+      delete:customers: "delete customer"
+      admin:customers: "create, update and delete customer"
+
 definitions:
   
   Customer:
     type: "object"
     required:
-    - "name"
-    - "photoUrls"
+    - "firstName"
+    - "lastName"
+    - "dateOfBirth"
+    - "emailAddress"
+    - "postalAddresses"
     properties:
       firstName:
-        type: "integer"
-        format: "int64"
+        type: "string"
+        description: "Customer's first name e.g. John"
+        maxLength: 30
+        minLength: 1
       lastName:
         type: "string"
+        maxLength: 30
+        minLength: 1
       dateOfBirth:
         type: "string"
         format: "date"
       emailAddress:
         type: "string"
         format: "email"
+        maxLength: 30
+        minLength: 3
       postalAddresses:
         type: "array"
         items:
@@ -154,31 +180,32 @@ definitions:
         - OFFICE
       streetNumber:
         type: "string"
+        maxLength: 8
       streetName:
         type: "string"
+        maxLength: 20
       suburb:
         type: "string"
+        maxLength: 20
       postalCode:
         type: "string"
+        maxLength: 10
       city:
         type: "string"
+        maxLength: 25
       state:
         type: "string"
+        maxLength: 25
       country:
         type: "string"
+        maxLength: 30
 
-
-
-  ApiResponse:
-    type: "object"
+  CreateCustomerResponse:
+    type: object
     properties:
-      code:
-        type: "integer"
-        format: "int32"
-      type:
+      id:
         type: "string"
-      message:
-        type: "string"
+
 externalDocs:
   description: "Find out more about Swagger"
   url: "http://swagger.io"
