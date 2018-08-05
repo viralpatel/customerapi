@@ -1,0 +1,184 @@
+swagger: "2.0"
+info:
+  description: "This is a sample server Petstore server.  You can find out more about     Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/).      For this sample, you can use the api key `special-key` to test the authorization     filters."
+  version: "1.0.0"
+  title: "Swagger Petstore"
+  termsOfService: "http://swagger.io/terms/"
+  contact:
+    email: "apiteam@swagger.io"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+host: "petstore.swagger.io"
+basePath: "/v2"
+tags:
+- name: "Customer"
+  description: "Customers of organisation"
+  externalDocs:
+    description: "Docs"
+    url: "https://crm.com/customer"
+    
+parameters:
+  customerId:
+    name: "customerId"
+    description: "Unique identifier of a Customer in CRM system"
+    in: "path"
+    type: "string"
+    required: true
+    
+schemes:
+- "https"
+- "http"
+paths:
+  /customers:
+    post:
+      tags: 
+      - "Customer"
+      summary: "Create customer"
+      description: "Create a new Customer record in Organisation CRM system."
+      operationId: "createCustomer"
+      consumes:
+      - "application/json"
+      - "application/xml"
+      produces:
+      - "application/xml"
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Customer object for creating new customer in CRM"
+        required: true
+        schema:
+          $ref: "#/definitions/Customer"
+      responses:
+        202:
+          description: "Created"
+        400:
+          description: "Bad request"
+        403:
+          description: "Unauthorised acceess"
+        500:
+          description: "Server error"
+          
+      security:
+      - petstore_auth:
+        - "write:pets"
+        - "read:pets"
+        
+  /customers/{customerId}:  
+    put:
+      tags:
+      - "Customer"
+      summary: "Update customer"
+      description: "Update an existing Customer record by customerId in Organisation CRM system."
+      operationId: "updateCustomer"
+      parameters:
+        - $ref: '#/parameters/customerId'
+        - in: "body"
+          name: "body"
+          description: "Customer object for creating new customer in CRM"
+          required: true
+          schema:
+            $ref: "#/definitions/Customer"
+      responses:
+        400:
+          description: "Bad request"
+        403:
+          description: "Unauthorised access"
+        404:
+          description: "Customer not found"
+        500:
+          description: "Server error"
+          
+    delete:
+      tags:
+      - "Customer"
+      summary: "Delete customer"
+      description: "Delete an existing Customer record by customerId in Organisation CRM system."
+      operationId: "deleteCustomer"
+      parameters:
+        - $ref: '#/parameters/customerId'        
+      responses:
+        400:
+          description: "Bad request"
+        403:
+          description: "Unauthorised access"
+        404:
+          description: "Customer not found"
+        500:
+          description: "Server error"
+            
+securityDefinitions:
+  petstore_auth:
+    type: "oauth2"
+    authorizationUrl: "http://petstore.swagger.io/oauth/dialog"
+    flow: "implicit"
+    scopes:
+      write:pets: "modify pets in your account"
+      read:pets: "read your pets"
+  api_key:
+    type: "apiKey"
+    name: "api_key"
+    in: "header"
+definitions:
+  
+  Customer:
+    type: "object"
+    required:
+    - "name"
+    - "photoUrls"
+    properties:
+      firstName:
+        type: "integer"
+        format: "int64"
+      lastName:
+        type: "string"
+      dateOfBirth:
+        type: "string"
+        format: "date"
+      emailAddress:
+        type: "string"
+        format: "email"
+      postalAddresses:
+        type: "array"
+        items:
+          $ref: "#/definitions/Address"
+
+  Address:
+    type: "object"
+    properties:
+      addressType:
+        type: "string"
+        enum:
+        - HOME
+        - OFFICE
+      streetNumber:
+        type: "string"
+      streetName:
+        type: "string"
+      suburb:
+        type: "string"
+      postalCode:
+        type: "string"
+      city:
+        type: "string"
+      state:
+        type: "string"
+      country:
+        type: "string"
+
+
+
+  ApiResponse:
+    type: "object"
+    properties:
+      code:
+        type: "integer"
+        format: "int32"
+      type:
+        type: "string"
+      message:
+        type: "string"
+externalDocs:
+  description: "Find out more about Swagger"
+  url: "http://swagger.io"
