@@ -1,0 +1,8 @@
+[source,http,options="nowrap"]
+----
+DELETE /customers/42 HTTP/1.1
+Content-Type: application/json;charset=UTF-8
+correlationId: 4a34dfd12
+Host: localhost:8080
+
+----
