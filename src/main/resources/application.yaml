@@ -1,0 +1,8 @@
+crm.endpoints.customer:
+  create: "http://www.mocky.io/v2/5b67173e320000bb04ee1233"
+  update: "http://www.mocky.io/v2/5b671a533200006d00ee1238"
+  delete: "http://www.mocky.io/v2/5b671a533200006d00ee1238"
+
+logging.level.org.springframework.web: DEBUG
+spring.jackson.serialization.indent_output: true
+
